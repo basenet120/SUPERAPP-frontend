@@ -23,16 +23,36 @@ export interface Category {
   display_order: number;
 }
 
-export async function getEquipment(category?: string, search?: string): Promise<Equipment[]> {
+export interface Pagination {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface EquipmentResponse {
+  data: Equipment[];
+  pagination: Pagination;
+}
+
+export async function getEquipment(
+  category?: string, 
+  search?: string, 
+  page: number = 1, 
+  limit: number = 25
+): Promise<EquipmentResponse> {
   const params = new URLSearchParams();
   if (category) params.append('category', category);
   if (search) params.append('search', search);
+  params.append('page', page.toString());
+  params.append('limit', limit.toString());
   
   const response = await fetch(`${API_URL}/equipment?${params}`);
   if (!response.ok) throw new Error('Failed to fetch equipment');
   
-  const data = await response.json();
-  return data.data;
+  return await response.json();
 }
 
 export async function getCategories(): Promise<Category[]> {

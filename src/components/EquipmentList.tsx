@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getEquipment, getCategories, type Equipment, type Category } from '../api';
+import { getEquipment, getCategories, type Equipment, type Category, type Pagination } from '../api';
 
 export function EquipmentList() {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
@@ -8,14 +8,30 @@ export function EquipmentList() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Pagination state
+  const [pagination, setPagination] = useState<Pagination>({
+    page: 1,
+    limit: 25,
+    totalCount: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrev: false
+  });
 
   useEffect(() => {
     loadCategories();
   }, []);
 
   useEffect(() => {
-    loadEquipment();
+    // Reset to page 1 when filters change
+    setPagination(prev => ({ ...prev, page: 1 }));
+    loadEquipment(1);
   }, [selectedCategory, searchQuery]);
+
+  useEffect(() => {
+    loadEquipment(pagination.page);
+  }, [pagination.page]);
 
   async function loadCategories() {
     try {
@@ -26,19 +42,28 @@ export function EquipmentList() {
     }
   }
 
-  async function loadEquipment() {
+  async function loadEquipment(page: number) {
     setLoading(true);
     setError(null);
     try {
-      const data = await getEquipment(
+      const response = await getEquipment(
         selectedCategory || undefined,
-        searchQuery || undefined
+        searchQuery || undefined,
+        page,
+        25
       );
-      setEquipment(data);
+      setEquipment(response.data);
+      setPagination(response.pagination);
     } catch (err) {
       setError('Failed to load equipment. Is the backend running?');
     } finally {
       setLoading(false);
+    }
+  }
+
+  function goToPage(page: number) {
+    if (page >= 1 && page <= pagination.totalPages) {
+      setPagination(prev => ({ ...prev, page }));
     }
   }
 
@@ -79,6 +104,12 @@ export function EquipmentList() {
             ))}
           </select>
         </div>
+      </div>
+
+      {/* Results count */}
+      <div className="mb-4 text-sm text-gray-600">
+        Showing {equipment.length} of {pagination.totalCount} items
+        {pagination.totalPages > 1 && ` (Page ${pagination.page} of ${pagination.totalPages})`}
       </div>
 
       {/* Error */}
@@ -153,6 +184,57 @@ export function EquipmentList() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && pagination.totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-2">
+          <button
+            onClick={() => goToPage(pagination.page - 1)}
+            disabled={!pagination.hasPrev}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          
+          <div className="flex items-center gap-1">
+            {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+              // Show pages around current page
+              let pageNum: number;
+              if (pagination.totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (pagination.page <= 3) {
+                pageNum = i + 1;
+              } else if (pagination.page >= pagination.totalPages - 2) {
+                pageNum = pagination.totalPages - 4 + i;
+              } else {
+                pageNum = pagination.page - 2 + i;
+              }
+              
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => goToPage(pageNum)}
+                  className={`w-10 h-10 rounded-lg text-sm font-medium ${
+                    pageNum === pagination.page
+                      ? 'bg-blue-600 text-white'
+                      : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+          
+          <button
+            onClick={() => goToPage(pagination.page + 1)}
+            disabled={!pagination.hasNext}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
         </div>
       )}
 
