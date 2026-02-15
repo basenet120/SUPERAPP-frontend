@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getEquipment, getCategories, type Equipment, type Category, type Pagination } from '../api';
 import { useCart } from '../contexts/CartContext.tsx';
+import { EquipmentDetailModal } from './EquipmentDetailModal.tsx';
 
 export function EquipmentList() {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
@@ -10,6 +11,7 @@ export function EquipmentList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addedId, setAddedId] = useState<string | null>(null);
+  const [selectedEquipmentId, setSelectedEquipmentId] = useState<string | null>(null);
   
   const { addItem, totalItems } = useCart();
   
@@ -150,7 +152,8 @@ export function EquipmentList() {
           {equipment.map((item) => (
             <div
               key={item.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => setSelectedEquipmentId(item.id)}
             >
               {/* Image */}
               <div className="aspect-square bg-gray-100 relative">
@@ -186,7 +189,10 @@ export function EquipmentList() {
                   </span>
                 </div>
                 <button
-                  onClick={() => handleAddToQuote(item)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToQuote(item);
+                  }}
                   className={`w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors ${
                     addedId === item.id
                       ? 'bg-green-600 text-white'
@@ -200,6 +206,12 @@ export function EquipmentList() {
           ))}
         </div>
       )}
+
+      {/* Equipment Detail Modal */}
+      <EquipmentDetailModal
+        equipmentId={selectedEquipmentId}
+        onClose={() => setSelectedEquipmentId(null)}
+      />
 
       {/* Pagination */}
       {!loading && pagination.totalPages > 1 && (
