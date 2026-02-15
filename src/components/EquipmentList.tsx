@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getEquipment, getCategories, type Equipment, type Category, type Pagination } from '../api';
+import { useCart } from '../contexts/CartContext.tsx';
 
 export function EquipmentList() {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
@@ -8,6 +9,9 @@ export function EquipmentList() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [addedId, setAddedId] = useState<string | null>(null);
+  
+  const { addItem, totalItems } = useCart();
   
   // Pagination state
   const [pagination, setPagination] = useState<Pagination>({
@@ -18,6 +22,20 @@ export function EquipmentList() {
     hasNext: false,
     hasPrev: false
   });
+
+  const handleAddToQuote = (item: Equipment) => {
+    addItem({
+      id: item.id,
+      sku: item.sku,
+      name: item.name,
+      category: item.category,
+      retail_price: item.retail_price,
+      image_url: item.image_url,
+      availability: item.availability,
+    });
+    setAddedId(item.id);
+    setTimeout(() => setAddedId(null), 1500);
+  };
 
   useEffect(() => {
     loadCategories();
@@ -171,7 +189,7 @@ export function EquipmentList() {
                 <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2" title={item.name}>
                   {item.name}
                 </h3>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-3">
                   <span className="text-lg font-bold text-blue-600">
                     {formatPrice(item.retail_price)}
                   </span>
@@ -181,6 +199,16 @@ export function EquipmentList() {
                     </span>
                   )}
                 </div>
+                <button
+                  onClick={() => handleAddToQuote(item)}
+                  className={`w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors ${
+                    addedId === item.id
+                      ? 'bg-green-600 text-white'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                  }`}
+                >
+                  {addedId === item.id ? '✓ Added!' : 'Add to Quote'}
+                </button>
               </div>
             </div>
           ))}

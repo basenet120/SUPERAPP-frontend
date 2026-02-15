@@ -2,12 +2,15 @@ import { useState } from 'react'
 import { Login } from './components/Login'
 import { Dashboard } from './components/Dashboard'
 import { EquipmentList } from './components/EquipmentList'
+import { MiniCart } from './components/MiniCart'
+import { CartDrawer } from './components/CartDrawer'
 
 type Page = 'dashboard' | 'equipment'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [currentPage, setCurrentPage] = useState<Page>('dashboard')
+  const [cartOpen, setCartOpen] = useState(false)
 
   if (!isAuthenticated) {
     return (
@@ -50,7 +53,8 @@ function App() {
                 </button>
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-4">
+              <MiniCart onClick={() => setCartOpen(true)} />
               <button
                 onClick={() => setIsAuthenticated(false)}
                 className="text-sm text-gray-500 hover:text-gray-700"
@@ -68,6 +72,9 @@ function App() {
       ) : (
         <EquipmentList />
       )}
+
+      {/* Cart Drawer */}
+      <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </div>
   )
 }
