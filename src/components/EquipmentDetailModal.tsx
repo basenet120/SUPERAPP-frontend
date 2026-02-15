@@ -83,13 +83,15 @@ export function EquipmentDetailModal({ equipmentId, onClose }: EquipmentDetailMo
         ) : equipment ? (
           <>
             {/* Header with Image */}
-            <div className="relative h-64 bg-gray-100">
+            <div className="relative bg-gray-100">
               {equipment.image_url ? (
-                <img 
-                  src={equipment.image_url} 
-                  alt={equipment.name}
-                  className="w-full h-full object-contain"
-                />
+                <div className="aspect-video w-full">
+                  <img 
+                    src={equipment.image_url} 
+                    alt={equipment.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
                   <svg className="w-24 h-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
