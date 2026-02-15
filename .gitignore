@@ -34,7 +34,3 @@ lerna-debug.log*
 .DS_Store
 Thumbs.db
 
-# Backend specific (will be in separate repo)
-backend/node_modules/
-backend/dist/
-backend/.env
