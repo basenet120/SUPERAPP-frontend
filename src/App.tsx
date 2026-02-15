@@ -5,8 +5,9 @@ import { EquipmentList } from './components/EquipmentList'
 import { MiniCart } from './components/MiniCart'
 import { CartDrawer } from './components/CartDrawer'
 import { QuoteBuilder } from './components/QuoteBuilder'
+import { InventoryManager } from './components/InventoryManager'
 
-type Page = 'dashboard' | 'equipment' | 'quote'
+type Page = 'dashboard' | 'equipment' | 'quote' | 'inventory'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -52,6 +53,16 @@ function App() {
                 >
                   Equipment
                 </button>
+                <button
+                  onClick={() => setCurrentPage('inventory')}
+                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                    currentPage === 'inventory'
+                      ? 'border-blue-500 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  }`}
+                >
+                  Inventory
+                </button>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -70,6 +81,7 @@ function App() {
       {/* Page Content */}
       {currentPage === 'dashboard' && <Dashboard onLogout={() => setIsAuthenticated(false)} />}
       {currentPage === 'equipment' && <EquipmentList />}
+      {currentPage === 'inventory' && <InventoryManager />}
       {currentPage === 'quote' && (
         <QuoteBuilder 
           onBack={() => setCurrentPage('equipment')} 

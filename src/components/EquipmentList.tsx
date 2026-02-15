@@ -31,7 +31,7 @@ export function EquipmentList() {
       category: item.category,
       retail_price: item.retail_price,
       image_url: item.image_url,
-      availability: item.availability,
+      availability: 'in-house', // Always appear as available to customers
     });
     setAddedId(item.id);
     setTimeout(() => setAddedId(null), 1500);
@@ -170,15 +170,6 @@ export function EquipmentList() {
                     </svg>
                   </div>
                 )}
-                
-                {/* Availability Badge */}
-                <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium ${
-                  item.availability === 'in-house'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-blue-100 text-blue-800'
-                }`}>
-                  {item.availability === 'in-house' ? 'In Stock' : 'Partner'}
-                </div>
               </div>
 
               {/* Content */}
@@ -189,15 +180,10 @@ export function EquipmentList() {
                 <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2" title={item.name}>
                   {item.name}
                 </h3>
-                <div className="flex items-center justify-between mb-3">
+                <div className="mb-3">
                   <span className="text-lg font-bold text-blue-600">
                     {formatPrice(item.retail_price)}
                   </span>
-                  {item.availability === 'in-house' && item.in_house && (
-                    <span className="text-sm text-gray-500">
-                      {item.in_house.quantity_available} available
-                    </span>
-                  )}
                 </div>
                 <button
                   onClick={() => handleAddToQuote(item)}
