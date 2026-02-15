@@ -1,0 +1,75 @@
+import { useState } from 'react'
+import { Login } from './components/Login'
+import { Dashboard } from './components/Dashboard'
+import { EquipmentList } from './components/EquipmentList'
+
+type Page = 'dashboard' | 'equipment'
+
+function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [currentPage, setCurrentPage] = useState<Page>('dashboard')
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Login onLogin={() => setIsAuthenticated(true)} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex">
+              <div className="flex-shrink-0 flex items-center">
+                <span className="text-xl font-bold text-blue-600">Base OS</span>
+              </div>
+              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                <button
+                  onClick={() => setCurrentPage('dashboard')}
+                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                    currentPage === 'dashboard'
+                      ? 'border-blue-500 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  }`}
+                >
+                  Dashboard
+                </button>
+                <button
+                  onClick={() => setCurrentPage('equipment')}
+                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                    currentPage === 'equipment'
+                      ? 'border-blue-500 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  }`}
+                >
+                  Equipment
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <button
+                onClick={() => setIsAuthenticated(false)}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Page Content */}
+      {currentPage === 'dashboard' ? (
+        <Dashboard onLogout={() => setIsAuthenticated(false)} />
+      ) : (
+        <EquipmentList />
+      )}
+    </div>
+  )
+}
+
+export default App
