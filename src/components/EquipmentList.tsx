@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
-import { getEquipment, getCategories, type Equipment, type Category, type Pagination } from '../api';
+import { getEquipment, type Equipment, type Pagination } from '../api';
 import { useCart } from '../contexts/CartContext.tsx';
+import { useEquipmentFilter } from '../contexts/EquipmentFilterContext.tsx';
 import { EquipmentDetailModal } from './EquipmentDetailModal.tsx';
 
 export function EquipmentList() {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addedId, setAddedId] = useState<string | null>(null);
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string | null>(null);
   
-  const { addItem, totalItems } = useCart();
+  const { addItem } = useCart();
+  const { selectedCategory, searchQuery } = useEquipmentFilter();
   
   // Pagination state
   const [pagination, setPagination] = useState<Pagination>({
@@ -33,15 +32,11 @@ export function EquipmentList() {
       category: item.category,
       retail_price: item.retail_price,
       image_url: item.image_url,
-      availability: 'in-house', // Always appear as available to customers
+      availability: 'in-house',
     });
     setAddedId(item.id);
     setTimeout(() => setAddedId(null), 1500);
   };
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
 
   useEffect(() => {
     // Reset to page 1 when filters change
@@ -52,15 +47,6 @@ export function EquipmentList() {
   useEffect(() => {
     loadEquipment(pagination.page);
   }, [pagination.page]);
-
-  async function loadCategories() {
-    try {
-      const data = await getCategories();
-      setCategories(data);
-    } catch (err) {
-      console.error('Failed to load categories:', err);
-    }
-  }
 
   async function loadEquipment(page: number) {
     setLoading(true);
@@ -94,42 +80,14 @@ export function EquipmentList() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Equipment Rental</h1>
-        <p className="text-gray-600">Browse our inventory of professional production equipment</p>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="flex-1">
-          <input
-            type="text"
-            placeholder="Search equipment..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        <div>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full sm:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.name}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Results count */}
-      <div className="mb-4 text-sm text-gray-600">
-        Showing {equipment.length} of {pagination.totalCount} items
-        {pagination.totalPages > 1 && ` (Page ${pagination.page} of ${pagination.totalPages})`}
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Equipment Rental</h1>
+        <p className="text-gray-600">
+          Showing {pagination.totalCount} items
+          {selectedCategory && ` in ${selectedCategory}`}
+          {searchQuery && ` matching "${searchQuery}"`}
+        </p>
       </div>
 
       {/* Error */}
@@ -207,12 +165,6 @@ export function EquipmentList() {
         </div>
       )}
 
-      {/* Equipment Detail Modal */}
-      <EquipmentDetailModal
-        equipmentId={selectedEquipmentId}
-        onClose={() => setSelectedEquipmentId(null)}
-      />
-
       {/* Pagination */}
       {!loading && pagination.totalPages > 1 && (
         <div className="mt-8 flex items-center justify-center gap-2">
@@ -226,7 +178,6 @@ export function EquipmentList() {
           
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-              // Show pages around current page
               let pageNum: number;
               if (pagination.totalPages <= 5) {
                 pageNum = i + 1;
@@ -274,6 +225,12 @@ export function EquipmentList() {
           <p className="mt-1 text-sm text-gray-500">Try adjusting your search or filters.</p>
         </div>
       )}
+
+      {/* Equipment Detail Modal */}
+      <EquipmentDetailModal
+        equipmentId={selectedEquipmentId}
+        onClose={() => setSelectedEquipmentId(null)}
+      />
     </div>
   );
 }
