@@ -4,8 +4,9 @@ import { Dashboard } from './components/Dashboard'
 import { EquipmentList } from './components/EquipmentList'
 import { MiniCart } from './components/MiniCart'
 import { CartDrawer } from './components/CartDrawer'
+import { QuoteBuilder } from './components/QuoteBuilder'
 
-type Page = 'dashboard' | 'equipment'
+type Page = 'dashboard' | 'equipment' | 'quote'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -67,14 +68,21 @@ function App() {
       </nav>
 
       {/* Page Content */}
-      {currentPage === 'dashboard' ? (
-        <Dashboard onLogout={() => setIsAuthenticated(false)} />
-      ) : (
-        <EquipmentList />
+      {currentPage === 'dashboard' && <Dashboard onLogout={() => setIsAuthenticated(false)} />}
+      {currentPage === 'equipment' && <EquipmentList />}
+      {currentPage === 'quote' && (
+        <QuoteBuilder 
+          onBack={() => setCurrentPage('equipment')} 
+          onSubmit={() => setCurrentPage('dashboard')} 
+        />
       )}
 
       {/* Cart Drawer */}
-      <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <CartDrawer 
+        isOpen={cartOpen} 
+        onClose={() => setCartOpen(false)} 
+        onContinue={() => setCurrentPage('quote')}
+      />
     </div>
   )
 }

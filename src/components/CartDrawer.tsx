@@ -3,9 +3,10 @@ import { useCart } from '../contexts/CartContext.tsx';
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  onContinue?: () => void;
 }
 
-export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
+export function CartDrawer({ isOpen, onClose, onContinue }: CartDrawerProps) {
   const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
 
   if (!isOpen) return null;
@@ -120,8 +121,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               Taxes, insurance, and delivery calculated at checkout
             </p>
             <div className="space-y-2">
-              <button className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                Request Quote
+              <button
+                onClick={() => {
+                  onClose();
+                  onContinue?.();
+                }}
+                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+              >
+                Continue to Quote →
               </button>
               <button
                 onClick={clearCart}
